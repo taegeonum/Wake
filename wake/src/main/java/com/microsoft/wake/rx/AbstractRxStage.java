@@ -26,6 +26,8 @@ import com.microsoft.wake.metrics.Meter;
  */
 public abstract class AbstractRxStage<T> implements RxStage<T> {
 
+  protected final AtomicBoolean completing;
+  protected final AtomicBoolean completed;
   protected final AtomicBoolean closed;
   protected final String name;
   protected final Meter inMeter;
@@ -37,6 +39,8 @@ public abstract class AbstractRxStage<T> implements RxStage<T> {
    * @param stageName the stage name
    */
   public AbstractRxStage(String stageName) {
+    this.completing = new AtomicBoolean(false);
+    this.completed = new AtomicBoolean(false);
     this.closed = new AtomicBoolean(false);
     this.name = stageName;
     this.inMeter = new Meter(stageName+"_in");
@@ -50,6 +54,9 @@ public abstract class AbstractRxStage<T> implements RxStage<T> {
    * input must call this each time an event is input.
    */
   protected void beforeOnNext() {
+    if(completing.get()) {
+      throw new IllegalStateException("Can't call onNext() after onCompleted() or onError() has been called!");
+    }
     inMeter.mark(1);
   }
   
@@ -79,5 +86,14 @@ public abstract class AbstractRxStage<T> implements RxStage<T> {
    */
   public Meter getOutMeter() {
     return outMeter;
+  }
+  @Override
+  public void close() throws Exception {
+    if(!completed.get()) {
+      throw new IllegalStateException("Can't close until onCompleted() or onError() has returned!");
+    }
+    if(!closed.compareAndSet(false, true)) {
+      throw new IllegalStateException("Can't close a stage more than once!");
+    }
   }
 }

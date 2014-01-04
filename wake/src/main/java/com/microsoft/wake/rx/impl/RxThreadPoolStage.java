@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -147,6 +146,10 @@ public final class RxThreadPoolStage<T> extends AbstractRxStage<T> {
   }
   
   private void submitCompletion(final Runnable r) {
+    if(!completing.compareAndSet(false, true)) {
+      throw new IllegalStateException("Cannot call onError / onCompleted more than once!");
+    }
+
     executor.shutdown();
     completionExecutor.submit(new Runnable() {
 
@@ -154,9 +157,8 @@ public final class RxThreadPoolStage<T> extends AbstractRxStage<T> {
       public void run() {
         try {
           // no timeout for completion, only close()
-          if (!executor.awaitTermination(3153600000L, TimeUnit.SECONDS)) {
-            LOG.log(Level.SEVERE, "Executor terminated due to unrequired timeout");
-            observer.onError(new TimeoutException());
+          while (!executor.awaitTermination(10L, TimeUnit.SECONDS)) {
+            LOG.log(Level.SEVERE, "Executor still has not shut down: " + this);
           }
         } catch (InterruptedException e) {
           e.printStackTrace();
@@ -165,6 +167,11 @@ public final class RxThreadPoolStage<T> extends AbstractRxStage<T> {
         r.run();
       }
     });
+
+    if(!completed.compareAndSet(false, true)) {
+      throw new IllegalStateException("Cannot call onError / onCompleted more than once!");
+    }
+
   }
 
   /**
@@ -174,19 +181,18 @@ public final class RxThreadPoolStage<T> extends AbstractRxStage<T> {
    */
   @Override
   public void close() throws Exception {
-    if (closed.compareAndSet(false, true)) {
-      executor.shutdown();
-      completionExecutor.shutdown();
-      if (!executor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
-        LOG.log(Level.WARNING, "Executor did not terminate in " + shutdownTimeout + "ms.");
-        List<Runnable> droppedRunnables = executor.shutdownNow();
-        LOG.log(Level.WARNING, "Executor dropped " + droppedRunnables.size() + " tasks.");
-      }
-      if (!completionExecutor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
-        LOG.log(Level.WARNING, "Executor did not terminate in " + shutdownTimeout + "ms.");
-        List<Runnable> droppedRunnables = completionExecutor.shutdownNow();
-        LOG.log(Level.WARNING, "Completion executor dropped " + droppedRunnables.size() + " tasks.");
-      }
+    super.close();
+//    executor.shutdown();
+    completionExecutor.shutdown();
+    if (!executor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
+      LOG.log(Level.WARNING, "Executor did not terminate in " + shutdownTimeout + "ms.");
+      List<Runnable> droppedRunnables = executor.shutdownNow();
+      LOG.log(Level.WARNING, "Executor dropped " + droppedRunnables.size() + " tasks.");
+    }
+    if (!completionExecutor.awaitTermination(shutdownTimeout, TimeUnit.MILLISECONDS)) {
+      LOG.log(Level.WARNING, "Executor did not terminate in " + shutdownTimeout + "ms.");
+      List<Runnable> droppedRunnables = completionExecutor.shutdownNow();
+      LOG.log(Level.WARNING, "Completion executor dropped " + droppedRunnables.size() + " tasks.");
     }
   }
 
