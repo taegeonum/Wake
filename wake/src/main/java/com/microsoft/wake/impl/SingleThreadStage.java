@@ -71,7 +71,7 @@ public final class SingleThreadStage<T> extends AbstractEStage<T> {
     thread = new Thread(new Producer<T>(name, queue, handler, interrupted));
     thread.setName("SingleThreadStage<" + name + ">");
     thread.start();
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
   }
 
   /**

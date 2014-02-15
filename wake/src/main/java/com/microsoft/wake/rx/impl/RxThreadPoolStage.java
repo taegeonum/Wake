@@ -91,7 +91,7 @@ public final class RxThreadPoolStage<T> extends AbstractRxStage<T> {
     tf = new DefaultThreadFactory(name);
     this.executor = Executors.newFixedThreadPool(numThreads, tf);
     this.completionExecutor = Executors.newSingleThreadExecutor(tf);
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
   }
 
   /**

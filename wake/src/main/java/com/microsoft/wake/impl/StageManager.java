@@ -18,7 +18,10 @@ package com.microsoft.wake.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,25 +35,29 @@ import com.microsoft.wake.Stage;
 public final class StageManager implements Stage {
 
   private static final Logger LOG = Logger.getLogger(StageManager.class.getName());
-
+  private final UUID id = UUID.randomUUID();
+  
   private static StageManager instance = new StageManager();
+  private final Map<Stage, String> stageNames;
   private final List<Stage> stages;
   private final AtomicBoolean closed = new AtomicBoolean(false);
   
   StageManager() {
 
     stages = Collections.synchronizedList(new ArrayList<Stage>());
-    LOG.log(Level.FINE, "StageManager adds a shutdown hook");
+    stageNames = Collections.synchronizedMap(new HashMap<Stage, String>());
+    
+    LOG.log(Level.FINE, "StageManager {0} adds a shutdown hook", id);
     Runtime.getRuntime().addShutdownHook(new Thread(
       new Runnable() {
         @Override
         public void run() {
           try {
-            LOG.log(Level.FINEST, "Shutdown hook : closing stages");
+            LOG.log(Level.FINEST, "{0} Shutdown hook : closing stages", id);
             StageManager.instance().close();
-            LOG.log(Level.FINEST, "Shutdown hook : closed stages");
+            LOG.log(Level.FINEST, "{0} Shutdown hook : closed stages", id);
           } catch (Exception e) {
-            LOG.log(Level.WARNING, "StageManager close failure " + e.getMessage());
+            LOG.log(Level.WARNING, "StageManager {0} close failure {1}", new Object[] {id, e.getMessage()});
           }
         }
       }
@@ -61,17 +68,27 @@ public final class StageManager implements Stage {
     return instance;
   }
   
+  @Deprecated
   public void register(Stage stage) {
-    LOG.log(Level.FINEST, "StageManager adds stage " + stage);
+    LOG.log(Level.FINE, "StageManager {0} adds stage {1}", new Object[] {id, stage.getClass().getName()});
 
     stages.add(stage);
+    stageNames.put(stage, "unknown");
+  }
+  
+  public void register(String name, Stage stage) {
+    LOG.log(Level.FINE, "StageManager {0} adds stage {1} name {2}", new Object[] {id, stage.getClass().getName(), name});
+
+    stages.add(stage);
+    stageNames.put(stage, name);
   }
   
   @Override
   public void close() throws Exception {
     if (closed.compareAndSet(false, true)) {
-      for (Stage stage : stages) {
-        LOG.log(Level.FINEST, "Closing {0}", stage);
+      for (final Stage stage : stages) {
+        final String name = stageNames.get(stage);
+        LOG.log(Level.FINEST, "{0} Closing stage {1} name {2}", new Object[] {id, stage.getClass().getName(), name});
         stage.close();
       }
     }

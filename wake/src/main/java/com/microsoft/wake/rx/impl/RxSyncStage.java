@@ -55,7 +55,7 @@ public final class RxSyncStage<T> extends AbstractRxStage<T> {
       @Parameter(StageObserver.class) Observer<T> observer) {
     super(name);
     this.observer = observer;
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
   }
 
   /**

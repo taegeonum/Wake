@@ -49,20 +49,19 @@ public class ForkPoolStage<T> extends AbstractEStage<T> {
   
   @Inject
   public ForkPoolStage(@Parameter(StageConfiguration.StageName.class) String stageName,
-                         @Parameter(StageConfiguration.StageHandler.class) EventHandler<T> handler,
-                          WakeSharedPool sharedPool
-                          ) {
+      @Parameter(StageConfiguration.StageHandler.class) EventHandler<T> handler,
+      WakeSharedPool sharedPool) {
     super(stageName);
     this.pool = sharedPool;
     this.handler = handler;
     //TODO: should WakeSharedPool register its stages?
     
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
   }
   
   @Inject
   public ForkPoolStage(@Parameter(StageConfiguration.StageHandler.class) EventHandler<T> handler,
-                          WakeSharedPool sharedPool) {
+      WakeSharedPool sharedPool) {
     this(ForkPoolStage.class.getName(), handler, sharedPool);
   }
   

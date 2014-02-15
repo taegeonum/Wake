@@ -180,7 +180,7 @@ public class RemoteEvent<T> {
     builder.append(" seq=");
     builder.append(seq);
     builder.append(" event=");
-    builder.append(event);
+    builder.append(event.toString());
     return builder.toString();
   }
   

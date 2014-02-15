@@ -109,7 +109,7 @@ public final class TimerStage implements Stage {
       }
       
     }, initialDelay, period, TimeUnit.MILLISECONDS);
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
   }
 
 	

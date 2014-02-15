@@ -89,7 +89,7 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
     handlerContainer.setTransport(transport);
     myIdentifier = new SocketRemoteIdentifier((InetSocketAddress) transport.getLocalAddress());
     reSendStage = new RemoteSenderStage(codec, transport);
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
     LOG.log(Level.FINEST, "RemoteManager {0} instantiated id {1} counter {2}", new Object[]{this.name, myIdentifier, counter.incrementAndGet()});
   }
 
@@ -157,7 +157,7 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
   public <T, U extends T> AutoCloseable registerHandler(RemoteIdentifier sourceIdentifier,
                                                         Class<U> messageType, EventHandler<T> theHandler) {
     if (LOG.isLoggable(Level.FINE))
-      LOG.log(Level.FINE, "RemoteManager: {0} remoteid: {1} messageType: {2} handler: {3}", new Object[]{this.name, sourceIdentifier, messageType.getName(), theHandler.getClass().getName()});
+      LOG.log(Level.FINE, "RemoteManager: {0} myid: {1} remoteid: {2} messageType: {3} handler: {4}", new Object[] {this.name, myIdentifier, sourceIdentifier, messageType.getName(), theHandler.getClass().getName()});
     return handlerContainer.registerHandler(sourceIdentifier, messageType, theHandler);
   }
 
@@ -172,7 +172,7 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
   public <T, U extends T> AutoCloseable registerHandler(Class<U> messageType,
                                                         EventHandler<RemoteMessage<T>> theHandler) {
     if (LOG.isLoggable(Level.FINE))
-      LOG.log(Level.FINE, "RemoteManager: {0} messageType: {1} handler: {2}", new Object[]{this.name, messageType.getName(), theHandler.getClass().getName()});
+      LOG.log(Level.FINE, "RemoteManager: {0} myid: {1} messageType: {2} handler: {3}", new Object[]{this.name, myIdentifier, messageType.getName(), theHandler.getClass().getName()});
     return handlerContainer.registerHandler(messageType, theHandler);
   }
 

@@ -75,7 +75,7 @@ public final class SyncStage<T> extends AbstractEStage<T> {
     super(name);
     this.handler = handler;
     this.errorHandler = errorHandler;
-    StageManager.instance().register(this);
+    StageManager.instance().register(name, this);
   }
 	
   /**

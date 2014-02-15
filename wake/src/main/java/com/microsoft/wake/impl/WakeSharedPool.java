@@ -69,7 +69,7 @@ public class WakeSharedPool implements Stage {
     true);
     
     // register it with the StageManager, since the pool is meant to back stages
-    StageManager.instance().register(this);
+    StageManager.instance().register("WakeSharedPool", this);
   }
   
   @Inject
