@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class RemoteEvent<T> {
   
-  //private static final AtomicLong curSeq = new AtomicLong(0);
   private SocketAddress localAddr;
   private SocketAddress remoteAddr;
   private String src;
@@ -33,25 +32,6 @@ public class RemoteEvent<T> {
   private final T event;
   private final long seq;
   
-  /**
-   * Constructs a remote event
-   * 
-   * @param localAddr the local socket address
-   * @param remoteAddr the remote socket address
-   * @param src the source
-   * @param sink the remote sink
-   * @param event the event
-   */
-  /*public RemoteEvent(SocketAddress localAddr, SocketAddress remoteAddr, String src, String sink, T event) {
-    this.localAddr = localAddr;
-    this.remoteAddr = remoteAddr;
-    this.src = src;
-    this.sink = sink;
-    this.event = event;
-    this.seq = curSeq.getAndIncrement();
-  }
-  */
-
   /**
    * Constructs a remote event
    * 
