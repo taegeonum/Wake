@@ -90,7 +90,7 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
     myIdentifier = new SocketRemoteIdentifier((InetSocketAddress) transport.getLocalAddress());
     reSendStage = new RemoteSenderStage(codec, transport);
     StageManager.instance().register(name, this);
-    LOG.log(Level.FINEST, "RemoteManager {0} instantiated id {1} counter {2}", new Object[]{this.name, myIdentifier, counter.incrementAndGet()});
+    LOG.log(Level.FINEST, "RemoteManager: {0} myid {1} counter {2}", new Object[]{this.name, myIdentifier, counter.incrementAndGet()});
   }
 
   @Inject
