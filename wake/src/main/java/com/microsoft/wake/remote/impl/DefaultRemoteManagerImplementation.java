@@ -199,31 +199,31 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
   @Override
   public void close() {
     if (closed.compareAndSet(false, true)) {
-      LOG.log(Level.FINE, "RemoteManager: {0} Closing remote manager id: {1}", new Object[]{this.name, myIdentifier});
+      LOG.log(Level.FINE, "RemoteManager: {0} {1} Closing remote manager", new Object[] {name, myIdentifier});
 
       final Runnable closeRunnable = new Runnable() {
         @Override
         public void run() {
           try {
-            LOG.log(Level.FINE, "Closing sender stage {0}", myIdentifier);
+            LOG.log(Level.FINE, "RemoteManager: {0} {1} Closing sender stage", new Object[] {name, myIdentifier});
             reSendStage.close();
-            LOG.log(Level.FINE, "Closed the remote sender stage");
+            LOG.log(Level.FINE, "RemoteManager: {0} {1} Closed the remote sender stage", new Object[] {name, myIdentifier});
           } catch (final Exception e) {
             LOG.log(Level.SEVERE, "Unable to close the remote sender stage", e);
           }
 
           try {
-            LOG.log(Level.FINE, "Closing transport {0}", myIdentifier);
+            LOG.log(Level.FINE, "RemoteManager: {0} {1} Closing transport", new Object[] {name, myIdentifier});
             transport.close();
-            LOG.log(Level.FINE, "Closed the transport");
+            LOG.log(Level.FINE, "RemoteManager: {0} {1} Closed the transport", new Object[] {name, myIdentifier});
           } catch (final Exception e) {
             LOG.log(Level.SEVERE, "Unable to close the transport.", e);
           }
 
           try {
-            LOG.log(Level.FINE, "Closing receiver stage {0}", myIdentifier);
+            LOG.log(Level.FINE, "RemoteManager: {0} {1} Closing receiver stage", new Object[] {name, myIdentifier});
             reRecvStage.close();
-            LOG.log(Level.FINE, "Closed the remote receiver stage");
+            LOG.log(Level.FINE, "RemoteManager: {0} {1} Closed the remote receiver stage", new Object[] {name, myIdentifier});
           } catch (final Exception e) {
             LOG.log(Level.SEVERE, "Unable to close the remote receiver stage", e);
           }
@@ -235,7 +235,7 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
       closeExecutor.submit(closeRunnable);
       closeExecutor.shutdown();
       if (!closeExecutor.isShutdown()) {
-        LOG.log(Level.SEVERE, "close executor did not shutdown properly.");
+        LOG.log(Level.SEVERE, "RemoteManager: {0} {1} close executor did not shutdown properly.", new Object[] {name, myIdentifier});
       }
 
 
@@ -250,9 +250,9 @@ public class DefaultRemoteManagerImplementation implements RemoteManager {
 
 
       if (closeExecutor.isTerminated()) {
-        LOG.log(Level.FINE, "close executor did terminate properly.");
+        LOG.log(Level.FINE, "RemoteManager: {0} {1} close executor did terminate properly.", new Object[] {name, myIdentifier});
       } else {
-        LOG.log(Level.SEVERE, "close executor did not terminate properly.");
+        LOG.log(Level.SEVERE, "RemoteManager: {0} {1} close executor did not terminate properly.", new Object[] {name, myIdentifier});
       }
 
     }
