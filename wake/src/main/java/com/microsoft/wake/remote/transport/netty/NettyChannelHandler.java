@@ -54,8 +54,8 @@ class NettyChannelHandler extends SimpleChannelUpstreamHandler {
   @Override
   public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception {
     if (e instanceof ChannelStateEvent) {
-      if (LOG.isLoggable(Level.FINEST)) LOG.log(Level.FINEST, tag + " " + e.toString() + " local: " + e.getChannel().getLocalAddress() + 
-          " remote: " + e.getChannel().getRemoteAddress());
+      if (LOG.isLoggable(Level.FINEST)) LOG.log(Level.FINEST, "{0} {1} local: {2} remote: {3}", 
+          new Object[] {tag, e.toString(), e.getChannel().getLocalAddress(), e.getChannel().getRemoteAddress()});
     }
     super.handleUpstream(ctx, e);
   }
@@ -108,10 +108,8 @@ class NettyChannelHandler extends SimpleChannelUpstreamHandler {
    */
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-    LOG.log(Level.WARNING, "Unexpected exception from downstream. " + " channel: " + e.getChannel() + 
-        " local: " + e.getChannel().getLocalAddress() + 
-        " remote: " + e.getChannel().getRemoteAddress() + 
-        " cause: " + e.getCause());
+    LOG.log(Level.WARNING, "{0} unexpected exception from downstream. channel: {1} local: {2} remote: {3} cause: {4}", 
+        new Object[] {tag, e.getChannel(), e.getChannel().getLocalAddress(), e.getChannel().getRemoteAddress(), e.getCause()});
     e.getCause().printStackTrace();
     e.getChannel().close();
     listener.exceptionCaught(e);
